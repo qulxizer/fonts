@@ -12,22 +12,27 @@
       version = "3.2.1";
     in
     {
-      packages.${system}.default = pkgs.stdenvNoCC.mkDerivation
-        rec {
-          pname = "FiraCode";
-          inherit version;
-          dontConfigue = true;
-          src = pkgs.fetchzip {
-            url =
-              "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${pname}.zip";
-            hash = "sha256-R42y36YdFzyMbThhg3WeLs+uPrSjyiYDAvUWgt/rQg0=";
-            stripRoot = false;
+      packages.${system}.default = with pkgs;
+        pkgs.stdenvNoCC.mkDerivation
+          rec {
+            pname = "FiraCode";
+            inherit version;
+            dontConfigue = true;
+            src = pkgs.fetchzip {
+              url =
+                "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${pname}.zip";
+              hash = "sha256-R42y36YdFzyMbThhg3WeLs+uPrSjyiYDAvUWgt/rQg0=";
+              stripRoot = false;
+            };
+            installPhase = ''
+              mkdir -p $out/share/fonts
+              cp -R $src $out/share/fonts/truetype/
+            '';
+            meta = with lib; {
+              description = "FiraCode";
+              license = licenses.mit;
+            };
           };
-          installPhase = ''
-            mkdir -p $out/share/fonts
-            cp -R $src $out/share/fonts/truetype/
-          '';
-        };
 
     };
 }

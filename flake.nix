@@ -1,37 +1,33 @@
 {
-  description =
-    "A flake giving access to fonts that I use, outside of nixpkgs.";
+  description = "A very basic flake";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  outputs = { self, nixpkgs, flake-utils }:
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+  };
 
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          version = "3.2.1";
-        in
-        {
-          packages.${system}.firaCode = pkgs.stdenvNoCC.mkDerivation
-            rec {
-              pname = "FiraCode";
-              version = "3.2.1";
-              dontConfigue = true;
-              src = pkgs.fetchzip {
+  outputs = { self, nixpkgs }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+      version = "3.2.1";
+    in
+    {
+      packages.${system}.default = pkgs.stdenvNoCC.mkDerivation
+        rec {
+          pname = "FiraCode";
+          inherit version;
+          dontConfigue = true;
+          src = pkgs.fetchzip {
+            url =
+              "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${pname}.zip";
+            hash = "sha256-R42y36YdFzyMbThhg3WeLs+uPrSjyiYDAvUWgt/rQg0=";
+            stripRoot = false;
+          };
+          installPhase = ''
+            mkdir -p $out/share/fonts
+            cp -R $src $out/share/fonts/truetype/
+          '';
+        };
 
-                url =
-                  "https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${pname}.zip";
-                hash = "sha256-R42y36YdFzyMbThhg3WeLs+uPrSjyiYDAvUWgt/rQg0=";
-                stripRoot = false;
-              };
-              installPhase = ''
-                mkdir -p $out/share/fonts
-                cp -R $src $out/share/fonts/truetype/
-              '';
-            };
-          defaultPackage.${system} = self.packages.${system}.firaCode;
-        }
-      );
-
+    };
 }
